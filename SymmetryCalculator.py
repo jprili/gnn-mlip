@@ -237,12 +237,14 @@ class SymmetryCalculator:
                 writer.writerow(padding)
                 count += 1
     
-    def write_symmetries(self, dir_out, n_structures):
-        for s_no in range(1, n_structures + 1):
+    def write_symmetries(self, dir_out, n_start, n_stop):
+        for s_no in range(n_start, n_stop):
             self.write_symmetry(dir_out, s_no)
             print(f"structure {s_no} done!")
 
 
 if __name__ == "__main__":
     sym_calc = SymmetryCalculator()
-    sym_calc.write_symmetries(Path(r"./dat/symmetries"), sym_calc.get_num_structures())
+    n_start = 55
+    n_stop  = sym_calc.get_num_structures() + 1
+    sym_calc.write_symmetries(Path(r"./dat/symmetries"), n_start, n_stop)
