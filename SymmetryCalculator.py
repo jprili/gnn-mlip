@@ -85,7 +85,10 @@ class SymmetryCalculator:
         """
         out = 0
         if r <= self.r_c:
-            out = 0.5 * np.cos(np.pi * (r/self.r_c) + 1)
+            out = 0.5 * (
+                np.cos(np.pi * (r/self.r_c))
+                + 1
+                )
     
         return out
 
@@ -163,7 +166,7 @@ class SymmetryCalculator:
             
         return 2 * g1i_ptl
 
-    def get_g2i(self, r_i, r, eta2, zeta, lbd):
+    def get_g2i(self, r_i, r, eta2, lbd, zeta):
         """
         symmetry function for three atoms, mu = 2
         """
@@ -245,6 +248,6 @@ class SymmetryCalculator:
 
 if __name__ == "__main__":
     sym_calc = SymmetryCalculator()
-    n_start = 55
+    n_start = 62
     n_stop  = sym_calc.get_num_structures() + 1
     sym_calc.write_symmetries(Path(r"./dat/symmetries"), n_start, n_stop)
