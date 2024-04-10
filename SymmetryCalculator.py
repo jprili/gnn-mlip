@@ -240,8 +240,9 @@ class SymmetryCalculator:
     def write_symmetries(self, dir_out, n_structures):
         for s_no in range(1, n_structures + 1):
             self.write_symmetry(dir_out, s_no)
+            print(f"structure {s_no} done!")
 
 
 if __name__ == "__main__":
     sym_calc = SymmetryCalculator()
-    sym_calc.write_symmetries(Path(r"./dat/symmetries"), 1)
+    sym_calc.write_symmetries(Path(r"./dat/symmetries"), sym_calc.get_num_structures())
