@@ -191,9 +191,9 @@ class SymmetryCalculator:
 
                     g2i_ptl += (1 + lbd * cos_t_ijk)** zeta * \
                             np.exp(-eta2
-                                    * np.sum(
-                                        [r**2 for r in [r_ij, r_ik, r_jk]
-                                        ])) * cutoff
+                                    * (
+                                        r_ij**2 + r_ik**2 + r_jk**2
+                                        )) * cutoff
 
         return 2**(1 - eta2) * g2i_ptl
 
@@ -207,7 +207,7 @@ class SymmetryCalculator:
         )
 
         n_cols = 14
-        padding = np.zeros(n_cols)
+        out_shape = (self.get_max_unit_size(), n_cols)
 
         with open(file, "w") as f:
             self.parse_xsf(self.dir, s_no)
@@ -217,8 +217,8 @@ class SymmetryCalculator:
 
             writer = csv.writer(f)
             writer.writerow(np.arange(0, n_cols))
-            count = 0
 
+            out = np.zeros(out_shape)
             # iterate through atoms in unit cell
             for idx, pos in enumerate(self.positions[:self.unit_size]):
                 r_js = self.positions[self.positions != pos].reshape(-1, 3)
@@ -231,14 +231,9 @@ class SymmetryCalculator:
                 for jdx, params in enumerate(g2_params):
                     g2is[jdx] = self.get_g2i(pos, r_js, *params)
 
-                out = np.array([*g1is, *g2is])
-                writer.writerow(out)
-                count += 1
+                out[idx] = np.array([*g1is, *g2is])
 
-            max_size = self.get_max_unit_size()
-            while count < max_size:
-                writer.writerow(padding)
-                count += 1
+            writer.writerows(out)
     
     def write_symmetries(self, dir_out, n_start, n_stop):
         for s_no in range(n_start, n_stop):
@@ -248,6 +243,7 @@ class SymmetryCalculator:
 
 if __name__ == "__main__":
     sym_calc = SymmetryCalculator()
-    n_start = 62
-    n_stop  = sym_calc.get_num_structures() + 1
+    n_start = 4
+    n_stop  = 5
+    # n_stop  = sym_calc.get_num_structures() + 1
     sym_calc.write_symmetries(Path(r"./dat/symmetries"), n_start, n_stop)
