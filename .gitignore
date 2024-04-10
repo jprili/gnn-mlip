@@ -4,3 +4,4 @@ simon_solid_state.pdf
 .ipynb_checkpoints/*
 dat/*
 __pycache__/*
+venv/
