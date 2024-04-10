@@ -3,6 +3,9 @@ import os.path as path
 import csv
 import numpy as np
 
+def get_max_elements():
+    return 95
+
 def get_num_structs():
     return 7815
 
@@ -71,8 +74,16 @@ def write_positions_(target_path, s_no, positions):
     with open(full_path, "w") as f:
         writer = csv.writer(f)
         writer.writerow(["x_A", "y_A", "z_A"])
+        count = 0
         for position in positions:
             writer.writerow(position)
+            count += 1
+
+        while count < get_max_elements():
+            # padding
+            writer.writerow([-99.0, -99.0, -99.0])
+            count += 1
+        
 
 def create_position_files():
     dataset_path = r"./dat/data-set-2016-TiO2"
