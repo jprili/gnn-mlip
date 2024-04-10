@@ -1,3 +1,15 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
+import numpy as np
+# suppress tensorflow warnings
+import tensorflow as tf
+import keras
+
+from keras.models import Sequential 
+from keras import Input
+from keras.layers import Dense, \
+                         Dropout
 
 
 class BPNN(keras.Model):
@@ -11,18 +23,18 @@ class BPNN(keras.Model):
     The subnet takes all the atom coordinates,
     and outputs the atomic contribution of energy
     """
-    def __init__(layers: list, c, r_s, eta, lbd, zeta,
-                 *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, layers: list, r_c, r_s, eta1, eta2, lbd, zeta):
+        super().__init__()
 
         # properties of the subnet
-        self.layers  = layers
         self._input  = Input(shape = (2, ))
+        self.layers  = layers
         self._output = Dense(1, activation = "softmax")
         
-        self.c    = c   # angstrom
+        self.r_c  = r_c   # angstrom
         self.r_s  = r_s 
-        self.eta  = eta
+        self.eta1 = eta1
+        self.eta2 = eta2
         self.lbd  = 1 if lbd == 1 else -1
         self.zeta = zeta
 
@@ -32,70 +44,21 @@ class BPNN(keras.Model):
         """
         return np.sqrt(np.dot(r, r))
 
-    def _cut_off(self, r: float, c: float) -> float:
+    def _cut_off(self, r: float) -> float:
         """
         radial cutoff function
         """
         out = 0
-        if r <= c:
-            out = 0.5 * np.cos(np.pi * (r/c) + 1)
+        if r <= self.r_c:
+            out = 0.5 * np.cos(np.pi * (r/self.r_c) + 1)
     
         return out
-    
-    def get_g1i(self, r_i, r) -> float:
-        """
-        symmetry function for two atoms, mu = 1
-        """
-        g1i_ptl = 0
-        for r_j in r:
-            r_ij = self._norm(r_i - r_j)
 
-            # equation 4 in Behler, Parinello (2007)
-            g1i_ptl += np.exp(-eta * (r_ij - self.r_s)**2) \
-                     * _cut_off(r_ij, c)
-            
-        return 2 * g1i
-
-    def get_g1is(self, r):
-        """calculate g1i for all atoms"""
-        g1is = np.zeros(np.shape(r)[0])
-        for idx, r_i in enumerate(r[:-1]):
-            r_js = r[r != r_i].reshape(-1, 3)
-            g1is[idx] = self.get_g1i(r_i, r_js)
-
-        return g1is
-
-    def get_g2i(self, r_i, r):
-        """
-        symmetry function for three atoms, mu = 2
-        """
-        g2i_ptl = 0
-        for jdx, r_j in enumerate(r[:-1]):
-            for r_k in r[jdx:]:
-                r_ij = self._norm(r_i - r_j)
-                r_ik = self._norm(r_i - r_k)
-                r_jk = self._norm(r_j - r_k)
-                t_ijk = np.dot(r_ij, r_ik) / \
-                        (self._norm(r_ij) * self._norm(r_ik))
-
-                # equation 5 in Behler, Parinello (2007)
-                g2i_ptl += (1 + (self.lbd) * np.cos(t_ijk))**self.zeta * \
-                           np.exp(-self.eta
-                                  * np.sum(
-                                      [r**2 for r in [r_ij, r_ik, r_jk]
-                                    ])) * \
-                           self._cut_off(r_ij) * self._cut_off(r_ik) * \
-                           self._cut_off(r_jk)
-
-        return 2**(1 - eta) * g2i_ptl
-
-    def get_g2is(self, r):
-        """calculate g2i for all atoms"""
-        g2is = np.zeros(np.shape(r)[0])
-        for idx, r_i in enumerate(r[:-2]):
-            r_js = r[r != r_i].reshape(-1, 3)
-            g2is[idx] = self.get_g1i(r_i, r_js)
-        return g2is
+    def _trim_padding(self, inputs):
+        mask = tf.reduce_any(inputs != -99, axis=-1)
+        mask = tf.cast(mask, dtype=inputs.dtype)
+               
+        return inputs * tf.expand_dims(mask, axis=-1)
 
     def call(self, inputs, training = False):
         """
@@ -103,10 +66,11 @@ class BPNN(keras.Model):
         calculate the values of the symmetry functions
         for each atom and applies to the same layers.
         """
-        n_atoms = np.shape(inputs)[0]
-        e_curr  = 0
-        g1s = get_g1is(inputs)
-        g2s = get_g2is(inputs)
+        
+        inputs = self._trim_padding(inputs)
+        e_curr = 0
+        g1s = self.get_g1is(inputs)
+        g2s = self.get_g2is(inputs)
 
         for idx, in_vec in enumerate(zip(g1s, g2s)):
             in_vec = np.array(in_vec)
