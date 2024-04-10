@@ -2,10 +2,11 @@ import os
 import os.path as path
 import numpy as np
 import csv
+from pathlib import Path
 
 class SymmetryCalculator:
     def __init__(self, dir = "./dat/data-set-2016-TiO2", r_c = 6.5):
-        self.dir = dir
+        self.dir = Path(dir)
         
         self.is_periodic = True # no non-periodic files in default set
         self.start_idx   = 0
@@ -243,4 +244,4 @@ class SymmetryCalculator:
 
 if __name__ == "__main__":
     sym_calc = SymmetryCalculator()
-    sym_calc.write_symmetries(r"./dat/symmetries", 1)
+    sym_calc.write_symmetries(Path(r"./dat/symmetries"), 1)
