@@ -38,6 +38,7 @@ numpy==1.26.4
 opt-einsum==3.3.0
 optree==0.11.0
 packaging==24.0
+pandas==2.2.1
 parso==0.8.4
 pexpect==4.9.0
 pillow==10.3.0
@@ -50,6 +51,7 @@ pure-eval==0.2.2
 Pygments==2.17.2
 pyparsing==3.1.2
 python-dateutil==2.9.0.post0
+pytz==2024.1
 pyzmq==25.1.2
 requests==2.31.0
 rich==13.7.1
@@ -66,6 +68,7 @@ threadpoolctl==3.4.0
 tornado==6.4
 traitlets==5.14.2
 typing_extensions==4.11.0
+tzdata==2024.1
 urllib3==2.2.1
 wcwidth==0.2.13
 Werkzeug==3.0.2
