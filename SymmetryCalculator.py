@@ -245,7 +245,6 @@ class SymmetryCalculator:
                     g2is[jdx] = self.get_g2i(pos, r_js, *params)
 
                 out[idx] = np.array([*g1is, *g2is])
-                print(idx)
 
             writer.writerows(out)
     
@@ -257,7 +256,7 @@ class SymmetryCalculator:
 
 if __name__ == "__main__":
     sym_calc = SymmetryCalculator()
-    n_start = 27
-    n_stop  = 28
-    # n_stop  = sym_calc.get_num_structures() + 1
+    n_start = 1
+    # n_stop  = 28
+    n_stop  = sym_calc.get_num_structures() + 1
     sym_calc.write_symmetries(Path(r"./dat/symmetries"), n_start, n_stop)
