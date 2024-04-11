@@ -83,11 +83,11 @@ class SymmetryCalculator:
         """
         radial cutoff function
         """
-        out = 0
-        if r <= self.r_c:
-            out = 0.5 * (
-                np.cos(np.pi * (r/self.r_c))
-                + 1
+        out = np.zeros(np.shape(r))
+        mask = r <= self.r_c
+        out[mask] = 0.5 * (
+                    np.cos(np.pi * (r[mask]/self.r_c))
+                    + 1
                 )
     
         return out
@@ -156,44 +156,53 @@ class SymmetryCalculator:
         symmetry function for two atoms, mu = 1
         r_s = 0
         """
-        g1i_ptl = 0
-        for r_j in r:
-            r_ij = self._norm(r_i - r_j)
-
-            # equation 4 in Behler, Parinello (2007)
-            g1i_ptl += np.exp(-eta1 * (r_ij)**2) \
-                     * self._cut_off(r_ij)
+        r_ijs = np.linalg.norm(r_i - r, axis = 1)
+        # equation 4 in Behler, Parinello (2007)
+        g1i_ptl = np.exp(-eta1 * (r_ijs)**2) \
+                * self._cut_off(r_ijs)
             
-        return 2 * g1i_ptl
+        return 2 * np.sum(g1i_ptl)
 
     def get_g2i(self, r_i, r, eta2, lbd, zeta):
         """
         symmetry function for three atoms, mu = 2
         """
         g2i_ptl = 0
-        for idx, r_j in enumerate(r):
-            for r_k in r[idx:]:
-                r_ij = self._norm(r_i - r_j)
-                r_ik = self._norm(r_i - r_k)
-                r_jk = self._norm(r_j - r_k)
+        diffs = r_i - r
+        norms = np.linalg.norm(diffs, axis = 1)
+        cutoffs = self._cut_off(norms)
+
+        for idx, r_j in enumerate(r[:-1]):
+            # start from the next element in the list
+            for jdx, r_k in enumerate(r[idx + 1:]):
+                jdx = jdx + 1
+                # vectors
+                r_ij = diffs[idx]
+                r_ik = diffs[idx + jdx]
+                r_jk = r_j - r_k
+
+                # norms
+                nr_ij = norms[idx]
+                nr_ik = norms[idx + jdx]
+                nr_jk = self._norm(r_jk)
 
                 # equation 5 in Behler, Parinello (2007)
-                cutoff = self._cut_off(r_ij) \
-                       * self._cut_off(r_ik) \
-                       * self._cut_off(r_jk)
+                cutoff = cutoffs[idx] \
+                       * cutoffs[idx + jdx] \
+                       * self._cut_off(nr_jk)
                 
                 if cutoff == 0.0:
                     continue
                 else:
                     # t_ijk is a big time sink
                     cos_t_ijk = np.dot(r_ij, r_ik) / \
-                        (self._norm(r_ij) * self._norm(r_ik))
+                        (nr_ij * nr_ik)
 
-                    g2i_ptl += (1 + lbd * cos_t_ijk)** zeta * \
+                    g2i_ptl += (1 + lbd * cos_t_ijk)**zeta * \
                             np.exp(-eta2
                                     * (
-                                        r_ij**2 + r_ik**2 + r_jk**2
-                                        )) * cutoff
+                                        nr_ij**2 + nr_ik**2 + nr_jk**2
+                                    )) * cutoff
 
         return 2**(1 - eta2) * g2i_ptl
 
@@ -209,7 +218,10 @@ class SymmetryCalculator:
         n_cols = 14
         out_shape = (self.get_max_unit_size(), n_cols)
 
-        with open(file, "w") as f:
+        g1_params = self.get_g1_params()
+        g2_params = self.get_g2_params()
+
+        with open(file, "w", newline = "") as f:
             self.parse_xsf(self.dir, s_no)
 
             if self.is_periodic:
@@ -224,14 +236,16 @@ class SymmetryCalculator:
                 r_js = self.positions[self.positions != pos].reshape(-1, 3)
 
                 # params are lists, g2is 
-                g1is = self.get_g1i(pos, r_js, self.get_g1_params())
+                g1is = np.zeros(np.shape(g1_params)[0])
+                for jdx, param in enumerate(g1_params):
+                    g1is[jdx] = self.get_g1i(pos, r_js, param)
 
-                g2_params = self.get_g2_params()
                 g2is = np.zeros(np.shape(g2_params)[0])
                 for jdx, params in enumerate(g2_params):
                     g2is[jdx] = self.get_g2i(pos, r_js, *params)
 
                 out[idx] = np.array([*g1is, *g2is])
+                print(idx)
 
             writer.writerows(out)
     
@@ -243,7 +257,7 @@ class SymmetryCalculator:
 
 if __name__ == "__main__":
     sym_calc = SymmetryCalculator()
-    n_start = 4
-    n_stop  = 5
+    n_start = 27
+    n_stop  = 28
     # n_stop  = sym_calc.get_num_structures() + 1
     sym_calc.write_symmetries(Path(r"./dat/symmetries"), n_start, n_stop)
