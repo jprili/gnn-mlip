@@ -20,7 +20,7 @@ def get_energy_(dataset_path, s_no):
 
 def write_energies_(target_path, energies):
     full_path = path.join(target_path, r"energies.csv")
-    with open(full_path, "w") as f:
+    with open(full_path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["energy_eV"])
         for energy in energies:
