@@ -1,15 +1,13 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
-import numpy as np
 # suppress tensorflow warnings
 import tensorflow as tf
 import keras
 
 from keras.models import Sequential 
 from keras import Input
-from keras.layers import Dense, \
-                         Dropout
+from keras.layers import Dense
 
 
 class BPNN(keras.Model):
@@ -31,6 +29,7 @@ class BPNN(keras.Model):
             Input(shape = (num_syms,)),
             *layers
         ])
+        self.ptl_out = Dense(1, activation = "linear")
         self.num_syms = num_syms
 
     def call(self, inputs, training = False):
@@ -44,11 +43,13 @@ class BPNN(keras.Model):
 
         sym_e_contribution = []
         for sym in syms:
+            # feed to subnet
             subnet_out = self.subnet(sym, training = training)
-            sym_e_contribution.append(subnet_out)
+            ptl_out = self.ptl_out(subnet_out)
+            sym_e_contribution.append(ptl_out)
 
         # turns the list into another tensor
         sym_preproc = tf.stack(sym_e_contribution, axis = 1)
 
         # add all the values in the tensor
-        return tf.reduce_sum(sym_preproc)
+        return tf.reshape(tf.reduce_sum(sym_preproc, axis = 1), [-1])
