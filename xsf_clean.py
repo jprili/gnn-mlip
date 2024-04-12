@@ -71,7 +71,7 @@ def write_positions_(target_path, s_no, positions):
         target_path, 
         f"pos_{str(s_no).zfill(4)}.csv"
     )
-    with open(full_path, "w") as f:
+    with open(full_path, "w", newline = "") as f:
         writer = csv.writer(f)
         writer.writerow(["x_A", "y_A", "z_A"])
         count = 0
