@@ -132,7 +132,9 @@ class SymmetryCalculator:
         # cubed to accomodate for periodic condition
         positions = np.zeros((self.unit_size * 27, dim_))
         
-        for idx, l in enumerate(lines[start_idx_ : start_idx_ + self.unit_size]):
+        for idx, l in enumerate(
+            lines[start_idx_ : start_idx_ + self.unit_size]
+            ):
             positions[idx, :] = np.array(
                 l.split()[1 : 1 + dim_]
             ).astype("float")
@@ -146,7 +148,9 @@ class SymmetryCalculator:
         """
         for c_idx, comb in enumerate(self.combs):
             d_vec = np.dot(self.prim_vecs, comb) # vector update
-            for n_idx, pos in enumerate(self.positions[:self.unit_size]):
+            for n_idx, pos in enumerate(
+                self.positions[:self.unit_size]
+                ):
                 idx = (c_idx + 1) * self.unit_size + n_idx
                 self.positions[idx] = pos + \
                       d_vec
