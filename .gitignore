@@ -6,3 +6,4 @@ dat/*
 __pycache__/*
 untitled_project/
 venv/
+*.pdf
