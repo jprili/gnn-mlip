@@ -66,41 +66,5 @@ def get_positions_(dataset_path, s_no):
             print(f"{is_in_pos = }")
     return positions
 
-def write_positions_(target_path, s_no, positions):
-    full_path = path.join(
-        target_path, 
-        f"pos_{str(s_no).zfill(4)}.csv"
-    )
-    with open(full_path, "w", newline = "") as f:
-        writer = csv.writer(f)
-        writer.writerow(["x_A", "y_A", "z_A"])
-        count = 0
-        for position in positions:
-            writer.writerow(position)
-            count += 1
-
-        while count < get_max_elements():
-            # padding
-            writer.writerow([-99.0, -99.0, -99.0])
-            count += 1
-        
-
-def create_position_files():
-    dataset_path = r"./dat/data-set-2016-TiO2"
-    target_path  = r"./dat/positions/"
-    
-    n_structures = get_num_structs()
-
-    for i in range(1, n_structures + 1):
-        positions = get_positions_(dataset_path, i)
-        
-        write_positions_(target_path, i, positions)
-# endregion
-
-def load_positions():
-    position_set = np.zeros()
-    return position_set
-
 if __name__ == "__main__":
     create_targets()
-    create_position_files()
