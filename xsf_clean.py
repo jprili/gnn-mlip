@@ -38,33 +38,5 @@ def create_targets():
     write_energies_(target_path, energies)
 # endregion
 
-# region position_compilation
-def get_positions_(dataset_path, s_no):
-    file = path.join(
-        dataset_path,
-        f"structure{str(s_no).zfill(4)}.xsf"
-    )
-    size_info_idx_ = 8
-    start_idx_     = 9
-    dim_           = 3
-    
-    with open(file, "r") as f:
-        lines = f.readlines()
-
-        # get number of atoms in structure
-        n_atoms = int(lines[size_info_idx_].split(" ")[0])
-
-        # initialise position array
-        positions = np.zeros((n_atoms, dim_))
-        
-        for idx, l in enumerate(lines[start_idx_ : start_idx_ + n_atoms]):
-            positions[idx, :] = np.array(
-                l.split()[1 : 1 + dim_]
-            ).astype("float")
-
-        if is_in_pos := 10 * np.ones(3) in positions:
-            print(f"{is_in_pos = }")
-    return positions
-
 if __name__ == "__main__":
     create_targets()
