@@ -52,3 +52,6 @@ or
 venv\Scripts\activate 
 ```
 in Windows.
+
+# Notes
+The folder `symmetries` need to be created first in `gnn-mlip/dat` for `SymmetryCalculator` to work properly.
