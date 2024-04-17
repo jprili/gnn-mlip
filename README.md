@@ -28,3 +28,27 @@ python virtual environment.
 `xsf_clean.py` and `SymmetryCalculator.py`.
 `mlip.ipynb` contains the data analysis done,
 and `BPNN.py` contains the class that implements the logic of the model.
+
+## Cloning the repository
+With the terminal in your desired directory, write
+```
+git clone https://github.com/jprili/gnn-mlip.git
+```
+This will download the source files in the repository in a `gnn-mlip` folder.
+## Setting up
+Make sure that to fetch and pull the latest changes first.
+To activate the virtual environment,
+use
+```
+virtualenv venv
+```
+and 
+```
+source venv/bin/activate
+```
+in UNIX systems (Mac/Linux)
+or 
+```
+venv\Scripts\activate 
+```
+in Windows.
