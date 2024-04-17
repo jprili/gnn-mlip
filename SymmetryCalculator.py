@@ -118,7 +118,9 @@ class SymmetryCalculator:
         ])
 
     def _set_unit_cell(self, lines):
-        
+        """
+        Parse unit cell into self.positions
+        """
         # TODO: add periodic condition here
         
         size_info_idx_ = 8
@@ -253,6 +255,9 @@ class SymmetryCalculator:
             writer.writerows(out)
     
     def write_symmetries(self, dir_out, n_start, n_stop):
+        """
+        Write symmetries into folder
+        """
         for s_no in range(n_start, n_stop):
             self.write_symmetry(dir_out, s_no)
             print(f"structure {s_no} done!")
