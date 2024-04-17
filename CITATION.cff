@@ -2,7 +2,7 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: gnn-mlip
+title: Machine Learning Interatomic Potentials with Keras API
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -10,6 +10,6 @@ type: software
 authors:
   - given-names: James Paolo
     family-names: Rili
-    email: jprili@student.ubc.ca
+    email: jprilI@student.ubc.ca
     affiliation: University of British Columbia
-repository-code: 'https://github.com/jprili/gnn-mlip'
+repository-code: 'https://github.com/jprili/gnn-mlip/'
